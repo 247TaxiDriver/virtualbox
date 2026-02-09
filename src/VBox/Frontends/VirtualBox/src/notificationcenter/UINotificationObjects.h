@@ -1,4 +1,4 @@
-/* $Id: UINotificationObjects.h 112898 2026-02-09 12:49:32Z sergey.dubov@oracle.com $ */
+/* $Id: UINotificationObjects.h 112902 2026-02-09 14:35:57Z sergey.dubov@oracle.com $ */
 /** @file
  * VBox Qt GUI - Various UINotificationObjects declarations.
  */
@@ -635,7 +635,14 @@ public:
                                        UIMediumDeviceType enmType,
                                        const QString &strLocation,
                                        const StorageSlot &storageSlot,
-                                       QWidget *pParent);
+                                       QWidget *pParent = 0);
+        /** Notifies about inability to attach device.
+          * @param  comMachine  Brings machine trying to attach device. */
+        static void cannotDetachDevice(const CMachine &comMachine,
+                                       UIMediumDeviceType enmType,
+                                       const QString &strLocation,
+                                       const StorageSlot &storageSlot,
+                                       QWidget *pParent = 0);
 
         /** Notifies about inability to find snapshot by ID.
           * @param  comMachine  Brings the machine being searched for particular snapshot.

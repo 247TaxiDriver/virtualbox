@@ -1,4 +1,4 @@
-/* $Id: UIMediumTools.cpp 112901 2026-02-09 14:34:18Z sergey.dubov@oracle.com $ */
+/* $Id: UIMediumTools.cpp 112902 2026-02-09 14:35:57Z sergey.dubov@oracle.com $ */
 /** @file
  * VBox Qt GUI - UIMediumTools class implementation.
  */
@@ -640,16 +640,16 @@ void UIMediumTools::updateMachineStorage(const CMachine &comConstMachine,
         comMachine.DetachDevice(target.name, target.port, target.device);
         fWasMounted = comMachine.isOk();
         if (!fWasMounted)
-            msgCenter().cannotDetachDevice(comMachine, UIMediumDeviceType_HardDisk, strCurrentLocation,
-                                           StorageSlot(enmCurrentStorageBus, target.port, target.device));
+            UINotificationMessage::cannotDetachDevice(comMachine, UIMediumDeviceType_HardDisk, strCurrentLocation,
+                                                      StorageSlot(enmCurrentStorageBus, target.port, target.device));
         else
         {
             /* Attaching: */
             comMachine.AttachDevice(target.name, target.port, target.device, KDeviceType_HardDisk, comMedium);
             fWasMounted = comMachine.isOk();
             if (!fWasMounted)
-                msgCenter().cannotAttachDevice(comMachine, UIMediumDeviceType_HardDisk, strCurrentLocation,
-                                               StorageSlot(enmCurrentStorageBus, target.port, target.device));
+                UINotificationMessage::cannotAttachDevice(comMachine, UIMediumDeviceType_HardDisk, strCurrentLocation,
+                                                          StorageSlot(enmCurrentStorageBus, target.port, target.device));
         }
     }
     /* Optical/floppy drive case: */

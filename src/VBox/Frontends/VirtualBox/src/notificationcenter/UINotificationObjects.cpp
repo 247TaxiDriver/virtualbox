@@ -1,4 +1,4 @@
-/* $Id: UINotificationObjects.cpp 112898 2026-02-09 12:49:32Z sergey.dubov@oracle.com $ */
+/* $Id: UINotificationObjects.cpp 112902 2026-02-09 14:35:57Z sergey.dubov@oracle.com $ */
 /** @file
  * VBox Qt GUI - Various UINotificationObjects implementations.
  */
@@ -1620,7 +1620,7 @@ void UINotificationMessage::cannotAttachDevice(const CMachine &comMachine,
                                                UIMediumDeviceType enmType,
                                                const QString &strLocation,
                                                const StorageSlot &storageSlot,
-                                               QWidget *pParent)
+                                               QWidget *pParent /* = 0 */)
 {
     QString strMessage;
     switch (enmType)
@@ -1660,6 +1660,53 @@ void UINotificationMessage::cannotAttachDevice(const CMachine &comMachine,
         strMessage + UIErrorString::formatErrorInfo(comMachine),
         pParent);
 }
+
+/* static */
+void UINotificationMessage::cannotDetachDevice(const CMachine &comMachine,
+                                               UIMediumDeviceType enmType,
+                                               const QString &strLocation,
+                                               const StorageSlot &storageSlot,
+                                               QWidget *pParent /* = 0 */)
+{
+    QString strMessage;
+    switch (enmType)
+    {
+        case UIMediumDeviceType_HardDisk:
+        {
+            strMessage = QApplication::translate("UIMessageCenter", "Failed to detach the hard disk (<nobr><b>%1</b></nobr>) "
+                                                                    "from the slot <i>%2</i> of the machine <b>%3</b>.")
+                                                                    .arg(strLocation)
+                                                                    .arg(gpConverter->toString(storageSlot))
+                                                                    .arg(CMachine(comMachine).GetName());
+            break;
+        }
+        case UIMediumDeviceType_DVD:
+        {
+            strMessage = QApplication::translate("UIMessageCenter", "Failed to detach the optical drive (<nobr><b>%1</b></nobr>) "
+                                                                    "from the slot <i>%2</i> of the machine <b>%3</b>.")
+                                                                    .arg(strLocation)
+                                                                    .arg(gpConverter->toString(storageSlot))
+                                                                    .arg(CMachine(comMachine).GetName());
+            break;
+        }
+        case UIMediumDeviceType_Floppy:
+        {
+            strMessage = QApplication::translate("UIMessageCenter", "Failed to detach the floppy drive (<nobr><b>%1</b></nobr>) "
+                                                                    "from the slot <i>%2</i> of the machine <b>%3</b>.")
+                                                                    .arg(strLocation)
+                                                                    .arg(gpConverter->toString(storageSlot))
+                                                                    .arg(CMachine(comMachine).GetName());
+            break;
+        }
+        default:
+            break;
+    }
+    createMessage(
+        QApplication::translate("UIMessageCenter", "Can't detach device ..."),
+        strMessage + UIErrorString::formatErrorInfo(comMachine),
+        pParent);
+}
+
 
 /* static */
 void UINotificationMessage::cannotFindSnapshotById(const CMachine &comMachine, const QUuid &uId)

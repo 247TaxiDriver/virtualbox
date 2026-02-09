@@ -1,4 +1,4 @@
-/* $Id: UIMessageCenter.h 112901 2026-02-09 14:34:18Z sergey.dubov@oracle.com $ */
+/* $Id: UIMessageCenter.h 112902 2026-02-09 14:35:57Z sergey.dubov@oracle.com $ */
 /** @file
  * VBox Qt GUI - UIMessageCenter class declaration.
  */
@@ -281,11 +281,6 @@ public:
         void cannotOpenSession(const CProgress &comProgress, const QString &strMachineName) const;
 
         void cannotSetExtraData(const CMachine &machine, const QString &strKey, const QString &strValue);
-
-        void cannotAttachDevice(const CMachine &machine, UIMediumDeviceType type, const QString &strLocation,
-                                const StorageSlot &storageSlot, QWidget *pParent = 0);
-        void cannotDetachDevice(const CMachine &machine, UIMediumDeviceType type, const QString &strLocation,
-                                const StorageSlot &storageSlot, QWidget *pParent = 0) const;
         bool cannotRemountMedium(const CMachine &machine, const UIMedium &medium,
                                  bool fMount, bool fRetry, QWidget *pParent = 0) const;
 

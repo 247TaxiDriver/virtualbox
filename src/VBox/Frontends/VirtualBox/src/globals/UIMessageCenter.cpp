@@ -1,4 +1,4 @@
-/* $Id: UIMessageCenter.cpp 112901 2026-02-09 14:34:18Z sergey.dubov@oracle.com $ */
+/* $Id: UIMessageCenter.cpp 112902 2026-02-09 14:35:57Z sergey.dubov@oracle.com $ */
 /** @file
  * VBox Qt GUI - UIMessageCenter class implementation.
  */
@@ -578,71 +578,6 @@ void UIMessageCenter::cannotSetExtraData(const CMachine &machine, const QString 
           tr("Failed to set the extra data for key <i>%1</i> of machine <i>%2</i> to value <i>{%3}</i>.")
              .arg(strKey, CMachine(machine).GetName(), strValue),
           UIErrorString::formatErrorInfo(machine));
-}
-
-void UIMessageCenter::cannotAttachDevice(const CMachine &machine, UIMediumDeviceType enmType,
-                                         const QString &strLocation, const StorageSlot &storageSlot,
-                                         QWidget *pParent /* = 0*/)
-{
-    QString strMessage;
-    switch (enmType)
-    {
-        case UIMediumDeviceType_HardDisk:
-        {
-            strMessage = tr("Failed to attach the hard disk (<nobr><b>%1</b></nobr>) to the slot <i>%2</i> of the machine <b>%3</b>.")
-                            .arg(strLocation).arg(gpConverter->toString(storageSlot)).arg(CMachine(machine).GetName());
-            break;
-        }
-        case UIMediumDeviceType_DVD:
-        {
-            strMessage = tr("Failed to attach the optical drive (<nobr><b>%1</b></nobr>) to the slot <i>%2</i> of the machine <b>%3</b>.")
-                            .arg(strLocation).arg(gpConverter->toString(storageSlot)).arg(CMachine(machine).GetName());
-            break;
-        }
-        case UIMediumDeviceType_Floppy:
-        {
-            strMessage = tr("Failed to attach the floppy drive (<nobr><b>%1</b></nobr>) to the slot <i>%2</i> of the machine <b>%3</b>.")
-                            .arg(strLocation).arg(gpConverter->toString(storageSlot)).arg(CMachine(machine).GetName());
-            break;
-        }
-        default:
-            break;
-    }
-    error(pParent, MessageType_Error,
-          strMessage, UIErrorString::formatErrorInfo(machine));
-}
-
-void UIMessageCenter::cannotDetachDevice(const CMachine &machine, UIMediumDeviceType enmType,
-                                         const QString &strLocation, const StorageSlot &storageSlot,
-                                         QWidget *pParent /* = 0*/) const
-{
-    /* Prepare the message: */
-    QString strMessage;
-    switch (enmType)
-    {
-        case UIMediumDeviceType_HardDisk:
-        {
-            strMessage = tr("Failed to detach the hard disk (<nobr><b>%1</b></nobr>) from the slot <i>%2</i> of the machine <b>%3</b>.")
-                            .arg(strLocation, gpConverter->toString(storageSlot), CMachine(machine).GetName());
-            break;
-        }
-        case UIMediumDeviceType_DVD:
-        {
-            strMessage = tr("Failed to detach the optical drive (<nobr><b>%1</b></nobr>) from the slot <i>%2</i> of the machine <b>%3</b>.")
-                            .arg(strLocation, gpConverter->toString(storageSlot), CMachine(machine).GetName());
-            break;
-        }
-        case UIMediumDeviceType_Floppy:
-        {
-            strMessage = tr("Failed to detach the floppy drive (<nobr><b>%1</b></nobr>) from the slot <i>%2</i> of the machine <b>%3</b>.")
-                            .arg(strLocation, gpConverter->toString(storageSlot), CMachine(machine).GetName());
-            break;
-        }
-        default:
-            break;
-    }
-    /* Show the error: */
-    error(pParent, MessageType_Error, strMessage, UIErrorString::formatErrorInfo(machine));
 }
 
 bool UIMessageCenter::cannotRemountMedium(const CMachine &machine, const UIMedium &medium, bool fMount,
