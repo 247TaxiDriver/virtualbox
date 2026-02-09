@@ -1,4 +1,4 @@
-/* $Id: VBoxGuestR3LibRuntimeXF86.c 112887 2026-02-09 10:14:42Z knut.osmundsen@oracle.com $ */
+/* $Id: VBoxGuestR3LibRuntimeXF86.c 112888 2026-02-09 10:18:30Z knut.osmundsen@oracle.com $ */
 /** @file
  * VBoxGuestR3Lib - Ring-3 Support Library for VirtualBox guest additions,
  *                  implements the minimum of runtime functions needed for
@@ -74,7 +74,7 @@ RTDECL(bool)    RTAssertShouldPanic(void)
 
 RTDECL(PRTLOGGER) RTLogDefaultInstanceEx(uint32_t fFlagsAndGroup)
 {
-    NOREF(fFlagsAndGroup);
+    RT_NOREF_PV(fFlagsAndGroup);
     return NULL;
 }
 
@@ -85,18 +85,18 @@ RTDECL(PRTLOGGER) RTLogRelGetDefaultInstance(void)
 
 RTDECL(PRTLOGGER) RTLogRelGetDefaultInstanceEx(uint32_t fFlagsAndGroup)
 {
-    NOREF(fFlagsAndGroup);
+    RT_NOREF_PV(fFlagsAndGroup);
     return NULL;
 }
 
-RTDECL(void) RTLogLoggerEx(PRTLOGGER, unsigned, unsigned, const char *pszFormat, ...)
+RTDECL(void) RTLogLoggerEx(PRTLOGGER pLogger, unsigned fFlags, unsigned iGroup, const char *pszFormat, ...)
 {
-    NOREF(pszFormat);
+    RT_NOREF(pLogger, fFlags, iGroup, pszFormat);
 }
 
 RTDECL(void *)  RTMemTmpAllocTag(size_t cb, const char *pszTag)
 {
-    NOREF(pszTag);
+    RT_NOREF_PV(pszTag);
     return xalloc(cb);
 }
 
