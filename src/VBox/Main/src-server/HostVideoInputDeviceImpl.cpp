@@ -1,4 +1,4 @@
-/* $Id: HostVideoInputDeviceImpl.cpp 112403 2026-01-11 19:29:08Z knut.osmundsen@oracle.com $ */
+/* $Id: HostVideoInputDeviceImpl.cpp 112876 2026-02-09 09:24:42Z knut.osmundsen@oracle.com $ */
 /** @file
  * Host video capture device implementation.
  */
@@ -251,12 +251,16 @@ static void hwcClose(int handle)
         close(handle);
 }
 
-static int hwcIoctl(int handle, unsigned fn, void *pv)
+#ifdef RT_OS_SOLARIS
+static int hwcIoctl(int handle, int fn, void *pv)
+#else
+static int hwcIoctl(int handle, unsigned long fn, void *pv)
+#endif
 {
     int ret;
     do
     {
-        ret = ioctl(handle, (int)fn, pv);
+        ret = ioctl(handle, fn, pv);
     } while (ret == -1 && errno == EINTR);
 
 #ifdef RT_OS_SOLARIS
