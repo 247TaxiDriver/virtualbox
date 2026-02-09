@@ -1,4 +1,4 @@
-# $Id: Makefile.kmk 112403 2026-01-11 19:29:08Z knut.osmundsen@oracle.com $
+# $Id: Makefile.kmk 112886 2026-02-09 09:35:09Z knut.osmundsen@oracle.com $
 ## @file
 # Sub-Makefile for XPCOM.
 #
@@ -39,7 +39,11 @@ endif
 
 # File for filtering out C symbols from the XPCOM library. Used to avoid
 # symbol namespace pollution, causing trouble with system libraries.
+# (llvm/clang doesn't have __bss_start, _edata or _end, so use edited version.)
 XPCOM_C_NAMESPACE_MAP = $(VBOX_PATH_XPCOM_SRC)/xpcom-namespace-cleanup.map
+ifdef VBOX_USE_CLANG
+ XPCOM_C_NAMESPACE_MAP = $(VBOX_PATH_XPCOM_SRC)/xpcom-namespace-cleanup-llvm.map
+endif
 ifdef VBOX_WITH_XPCOM_NAMESPACE_CLEANUP
  # At the moment, only Solaris uses the generated map file. GNU ld is smart
  # enough to handle symbol wildcards itself.
