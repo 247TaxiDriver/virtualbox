@@ -1,4 +1,4 @@
-/* $Id: UINotificationObjects.cpp 112853 2026-02-06 13:04:48Z sergey.dubov@oracle.com $ */
+/* $Id: UINotificationObjects.cpp 112898 2026-02-09 12:49:32Z sergey.dubov@oracle.com $ */
 /** @file
  * VBox Qt GUI - Various UINotificationObjects implementations.
  */
@@ -964,13 +964,13 @@ void UINotificationMessage::cannotAcquireVRDEServerInfoParameter(const CVRDEServ
 
 /* static */
 void UINotificationMessage::cannotAcquireVirtualSystemDescriptionParameter(const CVirtualSystemDescription &comVsd,
-                                                                           UINotificationCenter *pParent /* = 0 */)
+                                                                           QWidget *pParent)
 {
     createMessage(
         QApplication::translate("UIMessageCenter", "VSD failure ..."),
         QApplication::translate("UIMessageCenter", "Failed to acquire VSD parameter.") +
         UIErrorString::formatErrorInfo(comVsd),
-        QString(), QString(), pParent);
+        pParent);
 }
 
 /* static */

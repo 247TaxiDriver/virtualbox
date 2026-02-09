@@ -1,4 +1,4 @@
-/* $Id: UIDetailsWidgetCloudNetwork.cpp 112403 2026-01-11 19:29:08Z knut.osmundsen@oracle.com $ */
+/* $Id: UIDetailsWidgetCloudNetwork.cpp 112898 2026-02-09 12:49:32Z sergey.dubov@oracle.com $ */
 /** @file
  * VBox Qt GUI - UIDetailsWidgetCloudNetwork class implementation.
  */
@@ -81,8 +81,7 @@ void UISubnetSelectionDialog::accept()
                                           aTypes, aRefs, aOVFValues, aVBoxValues, aExtraConfigValues);
     if (!m_comDescription.isOk())
     {
-        UINotificationMessage::cannotAcquireVirtualSystemDescriptionParameter(m_comDescription,
-                                                                              m_pNotificationCenter);
+        UINotificationMessage::cannotAcquireVirtualSystemDescriptionParameter(m_comDescription, this);
         return;
     }
     AssertReturnVoid(!aVBoxValues.isEmpty());
@@ -161,8 +160,13 @@ void UISubnetSelectionDialog::prepare()
 
     /* Prepare local notification-center: */
     m_pNotificationCenter = new UINotificationCenter(this);
-    if (m_pNotificationCenter && m_pFormEditor)
-        m_pFormEditor->setNotificationCenter(m_pNotificationCenter);
+    if (m_pNotificationCenter)
+    {
+        QPointer<UINotificationCenter> target = m_pNotificationCenter;
+        setProperty("notification_center", QVariant::fromValue(target));
+        if (m_pFormEditor)
+            m_pFormEditor->setNotificationCenter(m_pNotificationCenter);
+    }
 
     /* Apply language settings: */
     sltRetranslateUI();

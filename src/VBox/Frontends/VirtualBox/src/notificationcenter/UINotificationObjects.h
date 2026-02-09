@@ -1,4 +1,4 @@
-/* $Id: UINotificationObjects.h 112853 2026-02-06 13:04:48Z sergey.dubov@oracle.com $ */
+/* $Id: UINotificationObjects.h 112898 2026-02-09 12:49:32Z sergey.dubov@oracle.com $ */
 /** @file
  * VBox Qt GUI - Various UINotificationObjects declarations.
  */
@@ -399,7 +399,7 @@ public:
         /** Notifies about inability to acquire IVirtualSystemDescription parameter.
           * @param  comVsd  Brings the object parameter get acquired from. */
         static void cannotAcquireVirtualSystemDescriptionParameter(const CVirtualSystemDescription &comVsd,
-                                                                   UINotificationCenter *pParent = 0);
+                                                                   QWidget *pParent);
         /** Notifies about inability to acquire IVirtualSystemDescriptionForm parameter.
           * @param  comVsdForm  Brings the object parameter get acquired from. */
         static void cannotAcquireVirtualSystemDescriptionFormParameter(const CVirtualSystemDescriptionForm &comVsdForm,
