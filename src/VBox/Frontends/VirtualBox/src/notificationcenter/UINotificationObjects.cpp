@@ -1,4 +1,4 @@
-/* $Id: UINotificationObjects.cpp 112914 2026-02-10 10:24:39Z sergey.dubov@oracle.com $ */
+/* $Id: UINotificationObjects.cpp 112916 2026-02-10 11:23:50Z sergey.dubov@oracle.com $ */
 /** @file
  * VBox Qt GUI - Various UINotificationObjects implementations.
  */
@@ -1979,22 +1979,24 @@ UINotificationMessage::~UINotificationMessage()
 }
 
 /* static */
-void UINotificationMessage::createMessage(const QString &strName,
-                                          const QString &strDetails,
-                                          const QString &strInternalName /* = QString() */,
-                                          const QString &strHelpKeyword /* = QString() */,
-                                          UINotificationCenter *pParent /* = 0 */)
+void UINotificationMessage::createMessageInt(UINotificationCenter *pParent,
+                                             const QString &strName,
+                                             const QString &strDetails,
+                                             const QString &strInternalName,
+                                             const QString &strHelpKeyword)
 {
+    /* Make sure parent is set: */
+    AssertPtr(pParent);
+    UINotificationCenter *pEffectiveParent = pParent ? pParent : gpNotificationCenter;
+
     /* Check if message suppressed: */
     if (isSuppressed(strInternalName))
         return;
+
     /* Check if message already exists: */
     if (   !strInternalName.isEmpty()
         && m_messages.contains(strInternalName))
         return;
-
-    /* Choose effective parent: */
-    UINotificationCenter *pEffectiveParent = pParent ? pParent : gpNotificationCenter;
 
     /* Create message finally: */
     const QUuid uId = pEffectiveParent->append(new UINotificationMessage(strName,
@@ -2008,14 +2010,29 @@ void UINotificationMessage::createMessage(const QString &strName,
 /* static */
 void UINotificationMessage::createMessage(const QString &strName,
                                           const QString &strDetails,
-                                          QWidget *pParent)
+                                          QWidget *pParent /* = 0 */)
 {
     /* Acquire notification-center, make sure it's present: */
     UINotificationCenter *pCenter = UINotificationCenter::acquire(pParent);
     AssertPtrReturnVoid(pCenter);
 
     /* Redirect to wrapper above: */
-    return createMessage(strName, strDetails, QString(), QString(), pCenter);
+    return createMessageInt(pCenter, strName, strDetails, QString(), QString());
+}
+
+/* static */
+void UINotificationMessage::createMessage(const QString &strName,
+                                          const QString &strDetails,
+                                          const QString &strInternalName,
+                                          const QString &strHelpKeyword /* = QString() */,
+                                          QWidget *pParent /* = 0 */)
+{
+    /* Acquire notification-center, make sure it's present: */
+    UINotificationCenter *pCenter = UINotificationCenter::acquire(pParent);
+    AssertPtrReturnVoid(pCenter);
+
+    /* Redirect to wrapper above: */
+    return createMessageInt(pCenter, strName, strDetails, strInternalName, strHelpKeyword);
 }
 
 /* static */

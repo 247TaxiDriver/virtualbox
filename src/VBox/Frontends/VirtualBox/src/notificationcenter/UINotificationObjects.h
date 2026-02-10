@@ -1,4 +1,4 @@
-/* $Id: UINotificationObjects.h 112915 2026-02-10 11:20:35Z sergey.dubov@oracle.com $ */
+/* $Id: UINotificationObjects.h 112916 2026-02-10 11:23:50Z sergey.dubov@oracle.com $ */
 /** @file
  * VBox Qt GUI - Various UINotificationObjects declarations.
  */
@@ -777,6 +777,24 @@ protected:
 private:
 
     /** Creates message.
+      * @param  pParent          Brings the local notification-center reference.
+      * @param  strName          Brings the message name.
+      * @param  strDetails       Brings the message details.
+      * @param  strInternalName  Brings the message internal name.
+      * @param  strHelpKeyword   Brings the message help keyword. */
+    static void createMessageInt(UINotificationCenter *pParent,
+                                 const QString &strName,
+                                 const QString &strDetails,
+                                 const QString &strInternalName,
+                                 const QString &strHelpKeyword);
+    /** Creates message.
+      * @param  strName     Brings the message name.
+      * @param  strDetails  Brings the message details.
+      * @param  pParent     Brings the parent reference. */
+    static void createMessage(const QString &strName,
+                              const QString &strDetails,
+                              QWidget *pParent = 0);
+    /** Creates message.
       * @param  strName          Brings the message name.
       * @param  strDetails       Brings the message details.
       * @param  strInternalName  Brings the message internal name.
@@ -784,16 +802,9 @@ private:
       * @param  pParent          Brings the local notification-center reference. */
     static void createMessage(const QString &strName,
                               const QString &strDetails,
-                              const QString &strInternalName = QString(),
+                              const QString &strInternalName,
                               const QString &strHelpKeyword = QString(),
-                              UINotificationCenter *pParent = 0);
-    /** Creates message.
-      * @param  strName     Brings the message name.
-      * @param  strDetails  Brings the message details.
-      * @param  pParent     Brings the parent reference. */
-    static void createMessage(const QString &strName,
-                              const QString &strDetails,
-                              QWidget *pParent);
+                              QWidget *pParent = 0);
     /** Destroys message.
       * @param  strInternalName  Brings the message internal name.
       * @param  pParent          Brings the local notification-center reference. */
