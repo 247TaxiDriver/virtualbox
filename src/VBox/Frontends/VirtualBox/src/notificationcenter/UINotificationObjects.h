@@ -1,4 +1,4 @@
-/* $Id: UINotificationObjects.h 112917 2026-02-10 11:27:42Z sergey.dubov@oracle.com $ */
+/* $Id: UINotificationObjects.h 112918 2026-02-10 11:40:49Z sergey.dubov@oracle.com $ */
 /** @file
  * VBox Qt GUI - Various UINotificationObjects declarations.
  */
@@ -252,6 +252,9 @@ public:
         /** Notifies about no IPv6 prefix specified.
           * @param  strName  Brings the interface name. */
         static void warnAboutNoIPv6PrefixSpecified(const QString &strName);
+
+        /** Notifies about state change. */
+        static void warnAboutStateChange(QWidget *pParent);
     /** @} */
 
     /** @name Simple Runtime UI warnings.

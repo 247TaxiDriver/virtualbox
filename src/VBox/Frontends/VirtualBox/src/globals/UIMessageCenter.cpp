@@ -1,4 +1,4 @@
-/* $Id: UIMessageCenter.cpp 112917 2026-02-10 11:27:42Z sergey.dubov@oracle.com $ */
+/* $Id: UIMessageCenter.cpp 112918 2026-02-10 11:40:49Z sergey.dubov@oracle.com $ */
 /** @file
  * VBox Qt GUI - UIMessageCenter class implementation.
  */
@@ -655,20 +655,6 @@ bool UIMessageCenter::confirmCreatingPath(const QString &strPath, QWidget *pPare
                           QString() /* ok button text */,
                           QString() /* cancel button text */,
                           false /* ok button by default? */);
-}
-
-void UIMessageCenter::warnAboutStateChange(QWidget *pParent /* = 0*/) const
-{
-    if (warningShown("warnAboutStateChange"))
-        return;
-    setWarningShown("warnAboutStateChange", true);
-
-    alert(pParent, MessageType_Warning,
-          tr("The virtual machine that you are changing has been started. "
-             "Only certain settings can be changed while a machine is running. "
-             "All other changes will be lost if you close this window now."));
-
-    setWarningShown("warnAboutStateChange", false);
 }
 
 bool UIMessageCenter::confirmSettingsDiscarding(QWidget *pParent /* = 0 */) const

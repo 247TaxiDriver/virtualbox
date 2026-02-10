@@ -1,4 +1,4 @@
-/* $Id: UINotificationObjects.cpp 112917 2026-02-10 11:27:42Z sergey.dubov@oracle.com $ */
+/* $Id: UINotificationObjects.cpp 112918 2026-02-10 11:40:49Z sergey.dubov@oracle.com $ */
 /** @file
  * VBox Qt GUI - Various UINotificationObjects implementations.
  */
@@ -504,6 +504,18 @@ void UINotificationMessage::warnAboutNoIPv6PrefixSpecified(const QString &strNam
         QApplication::translate("UIMessageCenter", "No IPv6 prefix specified ..."),
         QApplication::translate("UIMessageCenter", "No IPv6 prefix specified for the NAT network <b>%1</b>.")
                                                    .arg(strName));
+}
+
+/* static */
+void UINotificationMessage::warnAboutStateChange(QWidget *pParent)
+{
+    createMessage(QApplication::translate("UIMessageCenter", "State has changed ..."),
+                  QApplication::translate("UIMessageCenter", "The virtual machine that you are changing has been started. "
+                                                             "Only certain settings can be changed while a machine is running. "
+                                                             "All other changes will be lost if you close this window now."),
+                  "warnAboutStateChange",
+                  QString(),
+                  pParent);
 }
 
 /* static */

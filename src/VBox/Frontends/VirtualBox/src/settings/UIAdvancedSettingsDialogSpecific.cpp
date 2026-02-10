@@ -1,4 +1,4 @@
-/* $Id: UIAdvancedSettingsDialogSpecific.cpp 112917 2026-02-10 11:27:42Z sergey.dubov@oracle.com $ */
+/* $Id: UIAdvancedSettingsDialogSpecific.cpp 112918 2026-02-10 11:40:49Z sergey.dubov@oracle.com $ */
 /** @file
  * VBox Qt GUI - UIAdvancedSettingsDialogSpecific class implementation.
  */
@@ -822,5 +822,5 @@ void UIAdvancedSettingsDialogMachine::updateConfigurationAccessLevel()
 
     /* Show a warning about access level decrease if we should: */
     if (isSettingsChanged() && fShouldWeWarn)
-        msgCenter().warnAboutStateChange(this);
+        UINotificationMessage::warnAboutStateChange(this);
 }
