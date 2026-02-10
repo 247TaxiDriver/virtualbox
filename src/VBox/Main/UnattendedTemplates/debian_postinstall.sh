@@ -229,6 +229,7 @@ log_command_in_target /bin/bash "${MY_CHROOT_CDROM}/vboxadditions/@@VBOX_INSERT_
 log_command_in_target /bin/bash -c "udevadm control --reload-rules" # GAs doesn't yet do this.
 log_command_in_target /bin/bash -c "udevadm trigger"                 # (ditto)
 MY_IGNORE_EXITCODE=
+log_command_in_target groupadd --force --system vboxsf
 log_command_in_target usermod -a -G vboxsf "@@VBOX_INSERT_USER_LOGIN@@"
 @@VBOX_COND_END@@
 
@@ -333,4 +334,3 @@ echo "** Final exit code: ${MY_EXITCODE}" >> "${MY_LOGFILE}"
 echo "******************************************************************************" >> "${MY_LOGFILE}"
 
 exit ${MY_EXITCODE}
-
