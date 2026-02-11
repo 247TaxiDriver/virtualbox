@@ -1,4 +1,4 @@
-/* $Id: UIGlobalSettingsProxy.h 112403 2026-01-11 19:29:08Z knut.osmundsen@oracle.com $ */
+/* $Id: UIGlobalSettingsProxy.h 112954 2026-02-11 14:42:55Z sergey.dubov@oracle.com $ */
 /** @file
  * VBox Qt GUI - UIGlobalSettingsProxy class declaration.
  */
@@ -33,7 +33,6 @@
 
 /* GUI includes: */
 #include "UISettingsPage.h"
-#include "VBoxUtils.h"
 
 /* Forward declarations: */
 class UIProxyFeaturesEditor;

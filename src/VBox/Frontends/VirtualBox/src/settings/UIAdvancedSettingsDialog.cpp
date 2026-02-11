@@ -1,4 +1,4 @@
-﻿/* $Id: UIAdvancedSettingsDialog.cpp 112850 2026-02-06 11:10:07Z sergey.dubov@oracle.com $ */
+﻿/* $Id: UIAdvancedSettingsDialog.cpp 112954 2026-02-11 14:42:55Z sergey.dubov@oracle.com $ */
 /** @file
  * VBox Qt GUI - UIAdvancedSettingsDialog class implementation.
  */
@@ -73,9 +73,6 @@
 #include "UISettingsWarningPane.h"
 #include "UIShortcutPool.h"
 #include "UITranslationEventListener.h"
-#ifdef VBOX_WS_MAC
-# include "VBoxUtils.h"
-#endif
 
 
 /** QCheckBox subclass used as mode checkbox. */

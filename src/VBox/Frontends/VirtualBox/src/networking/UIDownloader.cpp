@@ -1,4 +1,4 @@
-/* $Id: UIDownloader.cpp 112403 2026-01-11 19:29:08Z knut.osmundsen@oracle.com $ */
+/* $Id: UIDownloader.cpp 112954 2026-02-11 14:42:55Z sergey.dubov@oracle.com $ */
 /** @file
  * VBox Qt GUI - UIDownloader class implementation.
  */
@@ -26,7 +26,6 @@
  */
 
 /* GUI includes: */
-#include "VBoxUtils.h"
 #include "UIDownloader.h"
 #include "UIMessageCenter.h"
 #include "UINetworkReply.h"

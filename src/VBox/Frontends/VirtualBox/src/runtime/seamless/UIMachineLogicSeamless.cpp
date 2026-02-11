@@ -1,4 +1,4 @@
-/* $Id: UIMachineLogicSeamless.cpp 112403 2026-01-11 19:29:08Z knut.osmundsen@oracle.com $ */
+/* $Id: UIMachineLogicSeamless.cpp 112954 2026-02-11 14:42:55Z sergey.dubov@oracle.com $ */
 /** @file
  * VBox Qt GUI - UIMachineLogicSeamless class implementation.
  */
@@ -42,8 +42,6 @@
 #include "UIShortcutPool.h"
 #ifndef VBOX_WS_MAC
 # include "QIMenu.h"
-#else
-# include "VBoxUtils.h"
 #endif
 
 /* COM includes: */

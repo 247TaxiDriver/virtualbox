@@ -1,4 +1,4 @@
-/* $Id: UIMachineWindowScale.cpp 112803 2026-02-03 11:43:28Z sergey.dubov@oracle.com $ */
+/* $Id: UIMachineWindowScale.cpp 112954 2026-02-11 14:42:55Z sergey.dubov@oracle.com $ */
 /** @file
  * VBox Qt GUI - UIMachineWindowScale class implementation.
  */
@@ -45,7 +45,6 @@
 #include "UIMachineView.h"
 #include "UINotificationCenter.h"
 #ifdef VBOX_WS_MAC
-# include "VBoxUtils.h"
 # include "UIImageTools.h"
 # include "UICocoaApplication.h"
 # include "UIVersion.h"

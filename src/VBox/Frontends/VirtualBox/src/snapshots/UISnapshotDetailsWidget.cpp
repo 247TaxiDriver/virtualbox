@@ -1,4 +1,4 @@
-/* $Id: UISnapshotDetailsWidget.cpp 112403 2026-01-11 19:29:08Z knut.osmundsen@oracle.com $ */
+/* $Id: UISnapshotDetailsWidget.cpp 112954 2026-02-11 14:42:55Z sergey.dubov@oracle.com $ */
 /** @file
  * VBox Qt GUI - UISnapshotDetailsWidget class implementation.
  */
@@ -58,7 +58,6 @@
 #include "UIMessageCenter.h"
 #include "UITranslator.h"
 #include "UITranslationEventListener.h"
-#include "VBoxUtils.h"
 
 /* COM includes: */
 #include "CAudioAdapter.h"

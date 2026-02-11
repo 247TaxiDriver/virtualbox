@@ -1,4 +1,4 @@
-/* $Id: UIMachineWindowNormal.cpp 112803 2026-02-03 11:43:28Z sergey.dubov@oracle.com $ */
+/* $Id: UIMachineWindowNormal.cpp 112954 2026-02-11 14:42:55Z sergey.dubov@oracle.com $ */
 /** @file
  * VBox Qt GUI - UIMachineWindowNormal class implementation.
  */
@@ -55,7 +55,6 @@
 #ifndef VBOX_WS_MAC
 # include "UIMenuBar.h"
 #else  /* VBOX_WS_MAC */
-# include "VBoxUtils.h"
 # include "UIImageTools.h"
 # include "UICocoaApplication.h"
 # include "UIVersion.h"

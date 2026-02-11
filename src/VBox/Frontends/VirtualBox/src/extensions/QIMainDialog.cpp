@@ -1,4 +1,4 @@
-/* $Id: QIMainDialog.cpp 112758 2026-01-29 16:58:23Z sergey.dubov@oracle.com $ */
+/* $Id: QIMainDialog.cpp 112954 2026-02-11 14:42:55Z sergey.dubov@oracle.com $ */
 /** @file
  * VBox Qt GUI - Qt extensions: QIMainDialog class implementation.
  */
@@ -30,6 +30,7 @@
 #include <QDialogButtonBox>
 #include <QDir>
 #include <QEventLoop>
+#include <QKeyEvent>
 #include <QMenu>
 #include <QProcess>
 #include <QPushButton>
@@ -39,7 +40,6 @@
 /* GUI includes: */
 #include "QIMainDialog.h"
 #include "UIDesktopWidgetWatchdog.h"
-#include "VBoxUtils.h"
 
 /* Other VBox includes: */
 #include <iprt/assert.h>

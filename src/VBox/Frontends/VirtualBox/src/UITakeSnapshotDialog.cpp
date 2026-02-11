@@ -1,4 +1,4 @@
-/* $Id: UITakeSnapshotDialog.cpp 112403 2026-01-11 19:29:08Z knut.osmundsen@oracle.com $ */
+/* $Id: UITakeSnapshotDialog.cpp 112954 2026-02-11 14:42:55Z sergey.dubov@oracle.com $ */
 /** @file
  * VBox Qt GUI - UITakeSnapshotDialog class implementation.
  */
@@ -38,7 +38,6 @@
 #include "QIDialogButtonBox.h"
 #include "QILabel.h"
 #include "QITextEdit.h"
-#include "VBoxUtils.h"
 #include "UICommon.h"
 #include "UIDesktopWidgetWatchdog.h"
 #include "UIShortcutPool.h"

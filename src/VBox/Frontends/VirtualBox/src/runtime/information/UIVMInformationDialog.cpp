@@ -1,4 +1,4 @@
-/* $Id: UIVMInformationDialog.cpp 112755 2026-01-29 16:40:20Z sergey.dubov@oracle.com $ */
+/* $Id: UIVMInformationDialog.cpp 112954 2026-02-11 14:42:55Z sergey.dubov@oracle.com $ */
 /** @file
  * VBox Qt GUI - UIVMInformationDialog class implementation.
  */
@@ -26,6 +26,7 @@
  */
 
 /* Qt includes: */
+#include <QCloseEvent>
 #include <QPushButton>
 #include <QScrollBar>
 #include <QVBoxLayout>
@@ -52,7 +53,6 @@
 #include "UITranslationEventListener.h"
 #include "UIVirtualBoxEventHandler.h"
 #include "UIVMInformationDialog.h"
-#include "VBoxUtils.h"
 
 UIVMInformationDialog::UIVMInformationDialog(UIActionPool *pActionPool)
     : QIMainWindow(0)

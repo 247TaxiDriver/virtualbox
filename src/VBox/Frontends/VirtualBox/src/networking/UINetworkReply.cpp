@@ -1,4 +1,4 @@
-/* $Id: UINetworkReply.cpp 112403 2026-01-11 19:29:08Z knut.osmundsen@oracle.com $ */
+/* $Id: UINetworkReply.cpp 112954 2026-02-11 14:42:55Z sergey.dubov@oracle.com $ */
 /** @file
  * VBox Qt GUI - UINetworkReply stuff implementation.
  */
@@ -39,7 +39,6 @@
 #include "UIExtraDataManager.h"
 #ifndef VBOX_GUI_IN_TST_SSL_CERT_DOWNLOADS
 # include "UIGlobalSession.h"
-# include "VBoxUtils.h"
 # include "CSystemProperties.h"
 #endif
 
