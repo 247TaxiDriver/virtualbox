@@ -1,4 +1,4 @@
-# $Id: Makefile.kmk 112821 2026-02-04 14:46:50Z sergey.dubov@oracle.com $
+# $Id: Makefile.kmk 112947 2026-02-11 13:51:59Z sergey.dubov@oracle.com $
 ## @file
 # Makefile for the VirtualBox Qt GUI.
 #
@@ -951,6 +951,11 @@ UICommon_QT_MOCHDRS = \
 	src/wizards/newvd/UIWizardNewVDSizeLocationPage.h \
 	src/wizards/newvd/UIWizardNewVDExpertPage.h
 
+if "$(KBUILD_TYPE)" != "release" || defined(VBOX_GUI_WITH_EXTRADATA_MANAGER_UI)
+ UICommon_QT_MOCHDRS += \
+ 	src/extradata/UIExtraDataManagerWindow.h
+endif
+
 ifdef VBOX_GUI_WITH_NETWORK_MANAGER
  UICommon_QT_MOCHDRS += \
  	src/networking/UIDownloader.h \
@@ -1542,6 +1547,11 @@ UICommon_SOURCES = \
 	src/wizards/newvd/UIWizardNewVDVariantPage.cpp \
 	src/wizards/newvd/UIWizardNewVDSizeLocationPage.cpp \
 	src/wizards/newvd/UIWizardNewVDExpertPage.cpp
+
+if "$(KBUILD_TYPE)" != "release" || defined(VBOX_GUI_WITH_EXTRADATA_MANAGER_UI)
+ UICommon_SOURCES += \
+ 	src/extradata/UIExtraDataManagerWindow.cpp
+endif
 
 ifdef VBOX_GUI_WITH_NETWORK_MANAGER
  UICommon_SOURCES += \
