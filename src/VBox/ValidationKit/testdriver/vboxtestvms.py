@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# $Id: vboxtestvms.py 112950 2026-02-11 14:10:44Z serkan.bayraktar@oracle.com $
+# $Id: vboxtestvms.py 112951 2026-02-11 14:19:11Z serkan.bayraktar@oracle.com $
 
 """
 VirtualBox Test VMs
@@ -36,7 +36,7 @@ terms and conditions of either the GPL or the CDDL or both.
 
 SPDX-License-Identifier: GPL-3.0-only OR CDDL-1.0
 """
-__version__ = "$Revision: 112950 $"
+__version__ = "$Revision: 112951 $"
 
 # Standard Python imports.
 import copy;
@@ -356,7 +356,7 @@ class BaseTestVm(object):
                     self.sKind        = aInfo[g_iKind];
                     break;
             if self.sKind is None:
-                reporter.fatal('The OS of test VM "%s" cannot be guessed1' % (self.sVmName,));
+                reporter.fatal('The OS of test VM "%s" cannot be guessed' % (self.sVmName,));
 
             # Check for 64-bit, if required and supported.
             if (self.aInfo[g_iFlags] & g_kiArchMask) == g_k32_64  and  _intersects(asSplit, ['64', 'amd64']):
@@ -369,7 +369,7 @@ class BaseTestVm(object):
                     self.aInfo = aInfo;
                     break;
             if self.aInfo is None:
-                reporter.fatal('The OS of test VM "%s" with sKind="%s" cannot be guessed2' % (self.sVmName, self.sKind));
+                reporter.fatal('The OS of test VM "%s" with sKind="%s" cannot be guessed' % (self.sVmName, self.sKind));
 
         # Translate sKind into sGuest OS Type.
         if self.sGuestOsType is None:
@@ -384,7 +384,7 @@ class BaseTestVm(object):
             elif self.sKind.find("DOS") >= 0:
                 self.sGuestOsType = g_ksGuestOsTypeDOS;
             else:
-                reporter.fatal('The OS of test VM "%s", sKind="%s" cannot be guessed3' % (self.sVmName, self.sKind));
+                reporter.fatal('The OS of test VM "%s", sKind="%s" cannot be guessed' % (self.sVmName, self.sKind));
 
         # Restrict modes and such depending on the OS.
         if self.asVirtModesSup is None:
@@ -1174,7 +1174,7 @@ class TestVm(object):                                       # pylint: disable=to
                     self.sKind        = aInfo[g_iKind];
                     break;
             if self.sKind is None:
-                reporter.fatal('The OS of test VM "%s" cannot be guessed4' % (self.sVmName,));
+                reporter.fatal('The OS of test VM "%s" cannot be guessed' % (self.sVmName,));
 
             # Check for 64-bit, if required and supported.
             if (self.aInfo[g_iFlags] & g_kiArchMask) == g_k32_64  and  _intersects(asSplit, ['64', 'amd64']):
@@ -1186,7 +1186,7 @@ class TestVm(object):                                       # pylint: disable=to
                     self.aInfo = aInfo;
                     break;
             if self.aInfo is None:
-                reporter.fatal('The OS of test VM "%s" with sKind="%s" cannot be guessed5' % (self.sVmName, self.sKind));
+                reporter.fatal('The OS of test VM "%s" with sKind="%s" cannot be guessed' % (self.sVmName, self.sKind));
 
         # Translate sKind into sGuest OS Type.
         if self.sGuestOsType is None:
@@ -1201,7 +1201,7 @@ class TestVm(object):                                       # pylint: disable=to
             elif self.sKind.find("DOS") >= 0:
                 self.sGuestOsType = g_ksGuestOsTypeDOS;
             else:
-                reporter.fatal('The OS of test VM "%s", sKind="%s" cannot be guessed6' % (self.sVmName, self.sKind));
+                reporter.fatal('The OS of test VM "%s", sKind="%s" cannot be guessed' % (self.sVmName, self.sKind));
 
         # Restrict modes and such depending on the OS.
         if self.asVirtModesSup is None:
