@@ -1,4 +1,4 @@
-; $Id: setjmp.asm 112988 2026-02-13 09:06:23Z knut.osmundsen@oracle.com $
+; $Id: setjmp.asm 112989 2026-02-13 09:35:27Z knut.osmundsen@oracle.com $
 ;; @file
 ; IPRT - No-CRT setjmp & longjmp - AMD64 & X86.
 ;
@@ -150,7 +150,7 @@ endstruc ; NT_TIB
 ;;
 ; Legacy interface.  The compiler emits call to _setjmp, passing a frame
 ; pointer (typically as the 2nd argument).  Fake this.
-RT_NOCRT_BEGINPROC setjmp
+RT_NOCRT_BEGINPROC setjmp       ; no-alias
         SEH64_END_PROLOGUE
  %ifdef RT_ARCH_AMD64
         xor     edx, edx                    ; frame pointer
@@ -587,6 +587,7 @@ ENDPROC RT_NOCRT(longjmp)
 
 %ifdef RT_OS_WINDOWS
  %ifndef RT_WITHOUT_NOCRT_WRAPPERS
+  %ifndef RT_WITH_NOCRT_ALIASES
 ;;
 ; Windows alia for longjmp.
 ;
@@ -598,18 +599,18 @@ ENDPROC RT_NOCRT(longjmp)
 ;
 BEGINPROC longjmp
         SEH64_END_PROLOGUE
- %ifndef IPRT_BUILD_TYPE_ASAN
+   %ifndef IPRT_BUILD_TYPE_ASAN
         jmp     NAME(RT_NOCRT(longjmp))
- %else
+   %else
         ; Must forward the request to the asan wrapper or we'll end up with weird
         ; false positive stack trashings, as asan doesn't unwind the stack protections.
         ; This means we're not testing our longjmp code in asan builds, but at least
         ; they don't fail.
         extern  NAME(__asan_wrap_longjmp)
         jmp     NAME(__asan_wrap_longjmp)
- %endif
+   %endif
 ENDPROC   longjmp
- %endif
-
-%endif
+  %endif ; !RT_WITH_NOCRT_ALIASES
+ %endif ; !RT_WITHOUT_NOCRT_WRAPPERS
+%endif ; RT_OS_WINDOWS
 
