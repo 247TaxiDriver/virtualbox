@@ -1,4 +1,4 @@
-/* $Id: UINotificationCenter.h 113006 2026-02-13 14:28:13Z sergey.dubov@oracle.com $ */
+/* $Id: UINotificationCenter.h 113008 2026-02-13 14:31:38Z sergey.dubov@oracle.com $ */
 /** @file
  * VBox Qt GUI - UINotificationCenter class declaration.
  */
@@ -189,6 +189,9 @@ private:
     void adjustGeometry();
     /** Adjusts mask. */
     void adjustMask();
+
+    /** Creates item with @a uId specified. */
+    void createItem(const QUuid &uId);
 
     /** Holds the notification-center singleton instance. */
     static UINotificationCenter *s_pInstance;

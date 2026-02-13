@@ -1,4 +1,4 @@
-/* $Id: UINotificationCenter.cpp 113006 2026-02-13 14:28:13Z sergey.dubov@oracle.com $ */
+/* $Id: UINotificationCenter.cpp 113008 2026-02-13 14:31:38Z sergey.dubov@oracle.com $ */
 /** @file
  * VBox Qt GUI - UINotificationCenter class implementation.
  */
@@ -471,11 +471,7 @@ void UINotificationCenter::sltHandleOrderChange()
 
     /* Populate model contents again: */
     foreach (const QUuid &uId, m_pModel->ids())
-    {
-        UINotificationObjectItem *pItem = UINotificationItem::create(this, m_pModel->objectById(uId));
-        m_items[uId] = pItem;
-        m_pLayoutItems->insertWidget(m_enmOrder == Qt::AscendingOrder ? -1 : 0, pItem);
-    }
+        createItem(uId);
 
     /* Hide and slide away if there are no notifications to show: */
     setHidden(m_pModel->ids().isEmpty());
@@ -550,11 +546,11 @@ void UINotificationCenter::sltHandleOpenTimerTimeout()
 
 void UINotificationCenter::sltHandleModelItemAdded(const QUuid &uId)
 {
-    /* Add corresponding model item representation: */
+    /* Make sure there is no item with such uId: */
     AssertReturnVoid(!m_items.contains(uId));
-    UINotificationObjectItem *pItem = UINotificationItem::create(this, m_pModel->objectById(uId));
-    m_items[uId] = pItem;
-    m_pLayoutItems->insertWidget(m_enmOrder == Qt::AscendingOrder ? -1 : 0, pItem);
+
+    /* Add corresponding model item representation: */
+    createItem(uId);
 
     /* Show if there are notifications to show: */
     setHidden(m_pModel->ids().isEmpty());
@@ -967,6 +963,14 @@ void UINotificationCenter::adjustMask()
     if (!animatedValue())
         region += QRect(m_pButtonOpen->mapToParent(QPoint(0, 0)), m_pButtonOpen->size());
     setMask(region);
+}
+
+void UINotificationCenter::createItem(const QUuid &uId)
+{
+    /* Create item itself: */
+    UINotificationObjectItem *pItem = UINotificationItem::create(this, m_pModel->objectById(uId));
+    m_items[uId] = pItem;
+    m_pLayoutItems->insertWidget(m_enmOrder == Qt::AscendingOrder ? -1 : 0, pItem);
 }
 
 
