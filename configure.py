@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# $Id: configure.py 113017 2026-02-13 15:53:45Z andreas.loeffler@oracle.com $
+# $Id: configure.py 113019 2026-02-13 16:41:04Z andreas.loeffler@oracle.com $
 """
 Configuration script for building VirtualBox.
 
@@ -61,7 +61,7 @@ SPDX-License-Identifier: GPL-3.0-only
 # External Python modules or other dependencies are not allowed!
 #
 
-__revision__ = "$Revision: 113017 $"
+__revision__ = "$Revision: 113019 $"
 
 import argparse
 import ctypes
@@ -3639,8 +3639,8 @@ def main():
     # - Everything internally used is prefixed with 'config_'.
     # - Library options are prefixed with 'config_libs_'.
     # - Tool options are prefixed with 'config_tools_'.
-    # - VirtualBox-specific environment variables (VBOX_WITH_, VBOX_ONLY_ and so on) are written as-is but lowercase (e.g. 'vbox_with_docs=1'),
-    #   including the value to be set.
+    # - Setting environment variables directly in the oParser arguments is forbidden!
+    #   Use the envTransforms block below instead.
     #
     oParser = argparse.ArgumentParser(description='Checks and configures the build environment', add_help=False);
     oParser.add_argument('-h', '--help', help="Displays this help", action='store_true');
@@ -3659,13 +3659,13 @@ def main():
         # For debugging / development only. We don't expose this in the syntax help.
         oParser.add_argument(f'--only-{oToolCur.sName}', help=argparse.SUPPRESS, action='store_true', default=None, dest=f'config_tools_only_{sToolName}');
 
-    oParser.add_argument('--disable-docs', '--without-docs', help='Disables building the documentation', action='store_true', default=None, dest='VBOX_WITH_DOCS=');
+    oParser.add_argument('--disable-docs', '--without-docs', help='Disables building the documentation', action='store_true', default=None, dest='config_disable_docs');
     oParser.add_argument('--disable-dtrace', '--without-dtrace', help='Disables building features requiring DTrace ', action='store_true', default=None, dest='config_disable_dtrace');
     oParser.add_argument('--disable-python', '--without-python', help='Disables building the Python bindings', action='store_true', default=None, dest='config_disable_python');
-    oParser.add_argument('--disable-pylint', '--without-pylint', help='Disables using pylint', action='store_true', default=None, dest='VBOX_WITH_PYLINT=');
+    oParser.add_argument('--disable-pylint', '--without-pylint', help='Disables using pylint', action='store_true', default=None, dest='config_disable_pylint');
     oParser.add_argument('--disable-sdl', '--without-sdl', help='Disables building the SDL frontend', action='store_true', default=None, dest='config_libs_disable_libsdl2');
-    oParser.add_argument('--disable-udptunnel', '--without-udptunnel', help='Disables building UDP tunnel support', action='store_true', default=None, dest='VBOX_WITH_UDPTUNNEL=');
-    oParser.add_argument('--disable-additions', '--without-additions', help='Disables building the Guest Additions', action='store_true', default=None, dest='VBOX_WITH_ADDITIONS=');
+    oParser.add_argument('--disable-udptunnel', '--without-udptunnel', help='Disables building UDP tunnel support', action='store_true', default=None, dest='config_disable_udptunnel');
+    oParser.add_argument('--disable-additions', '--without-additions', help='Disables building the Guest Additions', action='store_true', default=None, dest='config_disable_addiitons');
     oParser.add_argument('--disable-opengl', '--without-opengl', help='Disables building features which require OpenGL', action='store_true', default=None, dest='config_disable_opengl');
     oParser.add_argument('--ignore-in-tree-libs', help='Ignores all in-tree libs', action='store_true', default=None, dest='config_ignore_in_tree_libs');
     # Disables building the Extension Pack explicitly. Only makes sense for the non-OSE build.
@@ -3678,7 +3678,7 @@ def main():
     oParser.add_argument('--output-file-env', help='Path to output env[.bat|.sh] file', default=None, dest='config_file_env');
     oParser.add_argument('--output-file-log', help='Path to output log file', default=None, dest='config_file_log');
     oParser.add_argument('--only-additions', help='Only build Guest Additions related libraries and tools', action='store_true', default=None, dest='config_only_additions');
-    oParser.add_argument('--only-docs', help='Only build the documentation', action='store_true', default=None, dest='VBOX_ONLY_DOCS=1');
+    oParser.add_argument('--only-docs', help='Only build the documentation', action='store_true', default=None, dest='config_only_docs');
     # Note: '--odir' is kept for backwards compatibility.
     oParser.add_argument('--output-dir', '--odir', help='Specifies the output directory for all output files', default=g_sScriptPath, dest='config_out_dir');
     # Note: '--out-base-dir' is kept for backwards compatibility.
@@ -3708,7 +3708,6 @@ def main():
     # The following arguments are deprecated and undocumented -- kept for backwards compatibility.
     oParser.add_argument('--build-libssl', help=argparse.SUPPRESS, action='store_true', dest='config_libs_build_openssl');
     oParser.add_argument('--disable-qt6', help=argparse.SUPPRESS, dest='config_libs_disable_qt');
-    oParser.add_argument('--enable-webservice', help=argparse.SUPPRESS, action='store_true', default=None, dest='VBOX_WITH_WEBSERVICES=1');
     oParser.add_argument('--passive-mesa', help=argparse.SUPPRESS, action='store_true', default=None, dest='DISPLAY=');
     oParser.add_argument('--with-ddk', help=argparse.SUPPRESS, dest='config_tools_path_win_ddk');
     oParser.add_argument('--with-qt', '--with-qt-dir', help=argparse.SUPPRESS, dest='config_libs_path_qt');
@@ -3891,10 +3890,13 @@ def main():
         #
         # Generic
         #
+        # Only build the Guest Additions if explicitly specified.
         lambda env: { 'VBOX_ONLY_ADDITIONS': '1' } if g_oArgs.config_only_additions else {},
+        # Only build the documentation if explicitly specified.
+        lambda env: { 'VBOX_ONLY_DOCS': '1' } if g_oArgs.config_only_additions else {},
         # Disabling building the docs when only building Additions or explicitly disabled building the docs.
         lambda env: { 'VBOX_WITH_DOCS_PACKING': '' } if g_oArgs.config_only_additions
-                                                     or g_oEnv['VBOX_WITH_DOCS'] == '' else {},
+                                                     or g_oArgs.config_disable_docs else {},
         lambda env: { 'VBOX_WITH_WEBSERVICES': '' } if g_oArgs.config_only_additions else {},
         # Disable stuff which aren't available in OSE or if building the Validation Kit is disabled.
         lambda env: { 'VBOX_WITH_VALIDATIONKIT': '' , 'VBOX_WITH_WIN32_ADDITIONS': '' } if g_oArgs.config_ose
@@ -3922,6 +3924,8 @@ def main():
                       'VBOX_WITH_VMSVGA3D': '', \
                       'VBOX_WITH_3D_ACCELERATION' : '', \
                       'VBOX_GUI_USE_QGL' : '' } if g_oArgs.config_build_headless else {},
+        # Disable building the Guest Additions.
+        lambda env: { 'VBOX_WITH_ADDITIONS': '' } if g_oArgs.config_disable_additions else {},
         # Disable features when OpenGL is disabled.
         lambda env: { 'VBOX_WITH_VMSVGA3D': '', \
                       'VBOX_WITH_3D_ACCELERATION' : '', \
@@ -3934,6 +3938,12 @@ def main():
                       'VBOX_WITH_LIBVORBIS': '', \
                       'VBOX_WITH_AUDIO_RECORDING': '' } if  g_oArgs.config_libs_disable_libogg \
                                                         and g_oArgs.config_libs_disable_libvorbis else {},
+        # Disable building the documentation.
+        lambda env: { 'VBOX_WITH_DOCS': '' } if g_oArgs.config_disable_docs else {},
+        # Disable building with pylint.
+        lambda env: { 'VBOX_WITH_PYLINT': '' } if g_oArgs.config_disable_pylint else {},
+        # Disable building the udptunnel feature.
+        lambda env: { 'VBOX_WITH_UDPTUNNEL': '' } if g_oArgs.config_disable_udptunnel else {},
         # Disable building webservices if GSOAP is disabled.
         lambda env: { 'VBOX_WITH_GSOAP': '', \
                       'VBOX_WITH_WEBSERVICES': '' } if g_oArgs.config_tools_disable_gsoap else {},
