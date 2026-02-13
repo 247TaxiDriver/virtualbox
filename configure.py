@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# $Id: configure.py 113022 2026-02-13 17:33:30Z andreas.loeffler@oracle.com $
+# $Id: configure.py 113023 2026-02-13 17:57:44Z andreas.loeffler@oracle.com $
 """
 Configuration script for building VirtualBox.
 
@@ -61,7 +61,7 @@ SPDX-License-Identifier: GPL-3.0-only
 # External Python modules or other dependencies are not allowed!
 #
 
-__revision__ = "$Revision: 113022 $"
+__revision__ = "$Revision: 113023 $"
 
 import argparse
 import ctypes
@@ -1096,7 +1096,7 @@ class LibraryCheck(CheckBase):
                  sCode = None, fRun = True,
                  asIncPaths = None, asLibPaths = None,
                  fnCallback = None, aeTargetsExcluded = None, fUseInTree = False, sSdkName = None,
-                 dictDefinesToSetIfFailed = None):
+                 dictArgsToSetIfFailed = None):
         """
         Constructor.
         """
@@ -1122,10 +1122,10 @@ class LibraryCheck(CheckBase):
         # A string for constructing kBuild / VBox SDK defines (e.g. "MYLIB" -> SDK_MYLIB_INCS / SDK_MYLIB_LIBS).
         # If None, no SDK_ defines will be set.
         self.sSdkName = sSdkName;
-        # Defines set set (e.g. { "VBOX_WITH_MYFEATURE : '' }) if the library check failed.
-        # The key contains the define, the value the value to set.
+        # Defines arguments of g_oArgs to set (e.g. { "config_with_foo : '' }) if the library check failed.
+        # The key contains the config argument (must be part of g_oArgs), the value the value to set.
         # A non-empty dictonary makes the library optional.
-        self.dictDefinesToSetIfFailed = dictDefinesToSetIfFailed or {};
+        self.dictArgsToSetIfFailed = dictArgsToSetIfFailed or {};
         # Whether the library is disabled or not.
         self.fDisabled = False;
         # Base (root) path of the library. None if not (yet) found or not specified.
@@ -1573,7 +1573,7 @@ class LibraryCheck(CheckBase):
                     #   - this library is in-tree, as we ASSUME that we only have working libraries in there
                     #   or
                     #   - there are defines to disable the feature.
-                    fMayFail = self.fUseInTree or len(self.dictDefinesToSetIfFailed) > 0;
+                    fMayFail = self.fUseInTree or len(self.dictArgsToSetIfFailed) > 0;
                     # Only try to compile libraries which are not in-tree, as we only have sources in-tree, not binaries.
                     fRc, _, _ = self.compileAndRun(fErrorsAsWarnings = fMayFail);
                     if not fRc:
@@ -1585,11 +1585,11 @@ class LibraryCheck(CheckBase):
                     self.printWarn('Library needs to be used from in-tree sources but was not detected there -- might lead to build errors');
 
         if not fRc:
-            if self.dictDefinesToSetIfFailed: # Implies being optional.
+            if self.dictArgsToSetIfFailed: # Implies being optional.
                 self.printWarn('Library check failed and is optional');
-                for sKey, sVal in self.dictDefinesToSetIfFailed.items():
-                    self.printWarn(f"    - {sKey} -> {sVal if sVal else '<Unset>'}", fDontCount = True);
-                    g_oEnv.set(sKey, sVal);
+                for oArg, oVal in self.dictArgsToSetIfFailed.items():
+                    self.printWarn(f"    - {oArg} -> {oVal if oVal else '<Unset>'}", fDontCount = True);
+                    setattr(g_oArgs, oArg, oVal);
                 self.fHave = None; # Set to optional.
             else:
                 self.printError('Library check failed, but is required (see errors above)');
@@ -1792,7 +1792,7 @@ class ToolCheck(CheckBase):
     """
     def __init__(self, sName, asCmd = None, fnCallback = None, aeTargets = None, aeArchs = None,
                  enmBuildTarget = g_enmHostTarget, enmBuildArch = g_enmHostArch,
-                 aeTargetsExcluded = None, dictDefinesToSetIfFailed = None):
+                 aeTargetsExcluded = None, dictArgsToSetIfFailed = None):
         """
         Constructor.
         """
@@ -1805,7 +1805,7 @@ class ToolCheck(CheckBase):
         # Defines set set (e.g. { "VBOX_WITH_MYFEATURE : '' }) if the library check failed.
         # The key contains the define, the value the value to set.
         # A non-empty dictonary makes the library optional.
-        self.dictDefinesToSetIfFailed = dictDefinesToSetIfFailed or {};
+        self.dictArgsToSetIfFailed = dictArgsToSetIfFailed or {};
         # Whether the tool is disabled or not.
         self.fDisabled = False;
         # Absolute root path of the tool found.
@@ -1903,11 +1903,11 @@ class ToolCheck(CheckBase):
                     self.fHave = True if self.sCmdPath else False; # Note: Version is optional.
 
         if not self.fHave:
-            if self.dictDefinesToSetIfFailed: # Implies being optional.
+            if self.dictArgsToSetIfFailed: # Implies being optional.
                 self.printWarn('Tool check failed and is optional, disabling dependent features');
-                for sKey, sVal in self.dictDefinesToSetIfFailed.items():
-                    self.printWarn(f"    - {sKey} -> {sVal if sVal else '<Unset>'}", fDontCount = True);
-                    g_oEnv.set(sKey, sVal);
+                for oArg, oVal in self.dictArgsToSetIfFailed.items():
+                    self.printWarn(f"    - {oArg} -> {oVal if oVal else '<Unset>'}", fDontCount = True);
+                    setattr(g_oArgs, oArg, oVal);
                 self.fHave = None; # Set to optional.
             else:
                 self.printError('Tool not found, but is required (see errors above)');
@@ -2722,8 +2722,8 @@ class ToolCheck(CheckBase):
         """
 
         # If Python is disabled, skip.
-        if g_oArgs.config_disable_python:
-            self.printVerbose(1, 'Python C API disabled, skipping');
+        if g_oArgs.config_tools_disable_python:
+            self.printVerbose(1, 'Python disabled, skipping Python C API');
             return True;
 
         # On darwin (macOS), just enable Python support.
@@ -2777,7 +2777,7 @@ int main()
         """
 
         # If Python is disabled, skip.
-        if g_oArgs.config_disable_python:
+        if g_oArgs.config_tools_disable_python:
             self.printVerbose(1, 'Python disbled, skipping');
             return True;
 
@@ -3160,11 +3160,11 @@ class EnvManager:
                     aValueNew = sKey[idxSep + 1:];
                     self.set(sKeyNew, str(aValueNew));
 
-    def transform(self, mapTransform):
+    def transform(self, aTransforms):
         """
         Evaluates mapping expressions and updates the affected environment variables.
         """
-        for exprCur in mapTransform:
+        for exprCur in aTransforms:
             result = exprCur(self.env);
             if isinstance(result, dict):
                 for sKey, sValue in result.items():
@@ -3283,10 +3283,10 @@ g_aoLibs = [
                  asIncPaths = [ os.path.join(g_sScriptPath, 'include') ]),
     LibraryCheck("dxmt", [ "version.h" ], [ "libdxmt" ], aeTargets = [ BuildTarget.LINUX, BuildTarget.SOLARIS ], fUseInTree = True,
                  sCode = '#include <version.h>\nint main() { return 0; }\n',
-                 dictDefinesToSetIfFailed = { 'VBOX_WITH_DXMT' : '' }),
+                 dictArgsToSetIfFailed = { 'config_libs_disable_dxmt' : True }),
     LibraryCheck("dxvk", [ "version.h" ], [ "libdxvk" ],  aeTargets = [ BuildTarget.LINUX ], fUseInTree = True,
                  sCode = '#include <version.h>\nint main() { printf(DXVK_VERSION); return 0; }\n',
-                 dictDefinesToSetIfFailed = { 'VBOX_WITH_DXVK' : '' }),
+                 dictArgsToSetIfFailed = { 'config_libs_disable_dxvk' : True }),
     LibraryCheck("libasound", [ "alsa/asoundlib.h", "alsa/version.h" ], [ "libasound" ], aeTargets = [ BuildTarget.LINUX ],
                  sCode = '#include <alsa/asoundlib.h>\n#include <alsa/version.h>\nint main() { snd_pcm_info_sizeof(); printf("%s", SND_LIB_VERSION_STR); return 0; }\n'),
     LibraryCheck("libcap", [ "sys/capability.h" ], [ "libcap" ], aeTargets = [ BuildTarget.LINUX ],
@@ -3319,12 +3319,12 @@ g_aoLibs = [
                  sCode = '#include <slirp/libslirp.h>\n#include <slirp/libslirp-version.h>\nint main() { printf("%d.%d.%d", SLIRP_MAJOR_VERSION, SLIRP_MINOR_VERSION, SLIRP_MICRO_VERSION); return 0; }\n'),
     LibraryCheck("libssh", [ "libssh/libssh.h" ], [ "libssh" ], aeTargets = [ BuildTarget.DARWIN, BuildTarget.LINUX, BuildTarget.WINDOWS ], fUseInTree = True,
                  sCode = '#include <libssh/libssh.h>\n#include <libssh/libssh_version.h>\nint main() { printf("%d.%d.%d", LIBSSH_VERSION_MAJOR, LIBSSH_VERSION_MINOR, LIBSSH_VERSION_MICRO); return 0; }\n',
-                 dictDefinesToSetIfFailed = { 'VBOX_WITH_LIBSSH' : '' }),
+                 dictArgsToSetIfFailed = { 'config_libs_disable_libssh' : True }),
     LibraryCheck("libtpms", [ "libtpms/tpm_library.h" ], [ "libtpms" ], aeTargets = [ BuildTarget.ANY ], fUseInTree = True,
                  sCode = '#include <libtpms/tpm_library.h>\nint main() { printf("%d.%d.%d", TPM_LIBRARY_VER_MAJOR, TPM_LIBRARY_VER_MINOR, TPM_LIBRARY_VER_MICRO); return 0; }\n'),
     LibraryCheck("libvncserver", [ "rfb/rfb.h", "rfb/rfbclient.h" ], [ "libvncserver" ], aeTargets = [ BuildTarget.LINUX, BuildTarget.SOLARIS ],
                  sCode = '#include <rfb/rfb.h>\nint main() { printf("%s", LIBVNCSERVER_PACKAGE_VERSION); return 0; }\n',
-                 dictDefinesToSetIfFailed = { 'VBOX_WITH_EXTPACK_VNC' : '' }),
+                 dictArgsToSetIfFailed = { 'config_libs_disable_libvncserver' : True }),
     LibraryCheck("libvorbis", [ "vorbis/vorbisenc.h" ], [ "libvorbis", "libvorbisenc" ], aeTargets = [ BuildTarget.ANY ], fUseInTree = True,
                  sCode = '#include <vorbis/vorbisenc.h>\nint main() { vorbis_info v; vorbis_info_init(&v); int vorbis_rc = vorbis_encode_init_vbr(&v, 2 /* channels */, 44100 /* hz */, (float).4 /* quality */); printf("<found>"); return 0; }\n',
                  sSdkName = "VBoxLibVorbis"),
@@ -3350,13 +3350,13 @@ g_aoLibs = [
     LibraryCheck("qt", [ "QtCore/QtGlobal" ], [ ], aeTargets = [ BuildTarget.ANY ],
                  sCode = '#define IN_RING3\n#include <QtCore/QtGlobal>\nint main() { std::cout << QT_VERSION_STR << std::endl;\n#if QT_VERSION >= 6 * 65536 + 8 * 256\nreturn 0;\n#else\nreturn 1;\n#endif\n}',
                  fnCallback = LibraryCheck.checkCallback_qt,
-                 sSdkName = 'QT6', dictDefinesToSetIfFailed = { 'VBOX_WITH_QTGUI' : '', 'VBOX_WITH_NLS' : '', 'VBOX_WITH_MAIN_NLS': '', 'VBOX_WITH_PUEL_NLS': '', 'VBOX_WITH_VBOXMANAGE_NLS': '' }),
+                 sSdkName = 'QT6', dictArgsToSetIfFailed = { 'config_libs_disable_qt' : True }),
     LibraryCheck("libsdl2", [ "SDL2/SDL.h" ], [ "libSDL2" ], aeTargets = [ BuildTarget.LINUX, BuildTarget.SOLARIS ],
                  sCode = '#include <SDL2/SDL.h>\nint main() { printf("%d.%d.%d", SDL_MAJOR_VERSION, SDL_MINOR_VERSION, SDL_PATCHLEVEL); return 0; }\n',
-                 dictDefinesToSetIfFailed = { 'VBOX_WITH_VBOXSDL' : '' }),
+                 dictArgsToSetIfFailed = { 'config_libs_disable_libsdl2' : '' }),
     LibraryCheck("libsdl2_ttf", [ "SDL2/SDL_ttf.h" ], [ "libSDL2_ttf" ],
                  sCode = '#include <SDL2/SDL_ttf.h>\nint main() { printf("%d.%d.%d", SDL_TTF_MAJOR_VERSION, SDL_TTF_MINOR_VERSION, SDL_TTF_PATCHLEVEL); return 0; }\n',
-                 dictDefinesToSetIfFailed = { 'VBOX_WITH_SECURE_LABEL' : '' }),
+                 dictArgsToSetIfFailed = { 'config_libs_disable_libsdl2_ttf' : True }),
     LibraryCheck("libx11", [ "X11/Xlib.h" ], [ "libX11" ], aeTargets = [ BuildTarget.LINUX, BuildTarget.SOLARIS ], fRun = False,
                  sCode = '#include <X11/Xlib.h>\nint main() { Display *d = XOpenDisplay(NULL); XCloseDisplay(d); printf("<found>"); return 0; }\n'),
     LibraryCheck("libxext", [ "X11/extensions/Xext.h" ], [ "libXext" ], aeTargets = [ BuildTarget.LINUX, BuildTarget.SOLARIS ],
@@ -3378,24 +3378,24 @@ g_aoTools = [
     ToolCheck("kbuild", asCmd = [ "kbuild" ], fnCallback = ToolCheck.checkCallback_kBuild ),
     ToolCheck("win-visualcpp", asCmd = [ ], fnCallback = ToolCheck.checkCallback_WinVisualCPP, aeTargets = [ BuildTarget.WINDOWS ] ),
     ToolCheck("glslang", asCmd = [ "glslangValidator" ], aeTargets = [ BuildTarget.LINUX ],
-              dictDefinesToSetIfFailed = { 'VBOX_WITH_DXVK' : '' }),
+              dictArgsToSetIfFailed = { 'config_tools_disable_glslang' : True }),
     ToolCheck("macossdk", asCmd = [ ], fnCallback = ToolCheck.checkCallback_MacOSSDK, aeTargets = [ BuildTarget.DARWIN ] ),
     ToolCheck("devtools", asCmd = [ ], fnCallback = ToolCheck.checkCallback_devtools ),
     ToolCheck("gsoap", asCmd = [ ], fnCallback = ToolCheck.checkCallback_GSOAP ),
     ToolCheck("gsoapsources", asCmd = [ ], fnCallback = ToolCheck.checkCallback_GSOAPSources ),
     ToolCheck("java", asCmd = [ ], fnCallback = ToolCheck.checkCallback_Java,
-              dictDefinesToSetIfFailed = { 'VBOX_WITH_DOCS' : '', 'VBOX_WITH_JWS' : '', 'VBOX_WITH_JMSCOM': '', 'VBOX_WITH_JXPCOM' : '' }),
+              dictArgsToSetIfFailed = { 'config_tools_disable_java' : True }),
     ToolCheck("makeself", asCmd = [ ], fnCallback = ToolCheck.checkCallback_makeself, aeTargets = [ BuildTarget.LINUX ]),
     # On Solaris nasm is not officially supported.
     ToolCheck("nasm", asCmd = [ "nasm" ], fnCallback = ToolCheck.checkCallback_NASM, aeTargetsExcluded = [ BuildTarget.DARWIN, BuildTarget.SOLARIS ]),
     ToolCheck("openwatcom", asCmd = [ "wcl", "wcl386", "wlink" ], fnCallback = ToolCheck.checkCallback_OpenWatcom,
-              dictDefinesToSetIfFailed = { 'VBOX_WITH_OPEN_WATCOM' : '' }),
+              dictArgsToSetIfFailed = { 'config_tools_disable_openwatcom' : True }),
     ToolCheck("python_c_api", asCmd = [ ], fnCallback = ToolCheck.checkCallback_PythonC_API,
-              dictDefinesToSetIfFailed = { 'VBOX_WITH_PYTHON' : '' }),
+              dictArgsToSetIfFailed = { 'config_tools_disable_python' : True }),
     # Note: Currently only required for XPCOM.
     ToolCheck("python_modules", asCmd = [ ], fnCallback = ToolCheck.checkCallback_PythonModules,
               aeTargets = [ BuildTarget.DARWIN, BuildTarget.LINUX, BuildTarget.SOLARIS ],
-              dictDefinesToSetIfFailed = { 'VBOX_WITH_PYTHON' : '' }),
+              dictArgsToSetIfFailed = { 'config_tools_disable_python' : True }),
     ToolCheck("validationkit", asCmd = [], fnCallback = ToolCheck.checkValidationKit),
     ToolCheck("xcode", asCmd = [], fnCallback = ToolCheck.checkCallback_XCode, aeTargets = [ BuildTarget.DARWIN ]),
     ToolCheck("yasm", asCmd = [ 'yasm' ], fnCallback = ToolCheck.checkCallback_YASM),
@@ -3661,7 +3661,7 @@ def main():
 
     oParser.add_argument('--disable-docs', '--without-docs', help='Disables building the documentation', action='store_true', default=None, dest='config_disable_docs');
     oParser.add_argument('--disable-dtrace', '--without-dtrace', help='Disables building features requiring DTrace ', action='store_true', default=None, dest='config_disable_dtrace');
-    oParser.add_argument('--disable-python', '--without-python', help='Disables building the Python bindings', action='store_true', default=None, dest='config_disable_python');
+    oParser.add_argument('--disable-python', '--without-python', help='Disables building the Python bindings', action='store_true', default=None, dest='config_tools_disable_python');
     oParser.add_argument('--disable-pylint', '--without-pylint', help='Disables using pylint', action='store_true', default=None, dest='config_disable_pylint');
     oParser.add_argument('--disable-sdl', '--without-sdl', help='Disables building the SDL frontend', action='store_true', default=None, dest='config_libs_disable_libsdl2');
     oParser.add_argument('--disable-udptunnel', '--without-udptunnel', help='Disables building UDP tunnel support', action='store_true', default=None, dest='config_disable_udptunnel');
@@ -3880,111 +3880,6 @@ def main():
     print('Building %s version' % ('OSE' if (fOSE is None or fOSE is True) else 'PUEL'));
     print();
 
-    #
-    # Handle environment variable transformations.
-    #
-    # This is needed to set/unset/change other environment variables on already set ones.
-    # For instance, building OSE requires certain components to be disabled. Same when a certain library gets disabled.
-    #
-    envTransforms = [
-        #
-        # Generic
-        #
-        # Only build the Guest Additions if explicitly specified.
-        lambda env: { 'VBOX_ONLY_ADDITIONS': '1' } if g_oArgs.config_only_additions else {},
-        # Only build the documentation if explicitly specified.
-        lambda env: { 'VBOX_ONLY_DOCS': '1' } if g_oArgs.config_only_additions else {},
-        # Disabling building the docs when only building Additions or explicitly disabled building the docs.
-        lambda env: { 'VBOX_WITH_DOCS_PACKING': '' } if g_oArgs.config_only_additions
-                                                     or g_oArgs.config_disable_docs else {},
-        lambda env: { 'VBOX_WITH_WEBSERVICES': '' } if g_oArgs.config_only_additions else {},
-        # Disable stuff which aren't available in OSE or if building the Validation Kit is disabled.
-        lambda env: { 'VBOX_WITH_VALIDATIONKIT': '' , 'VBOX_WITH_WIN32_ADDITIONS': '' } if g_oArgs.config_ose
-                                                                                        or g_oArgs.config_tools_disable_validationkit else {},
-        # Disable building the Extension Pack VNC feature when only building Additions.
-        lambda env: { 'VBOX_WITH_EXTPACK_VNC': '' } if g_oArgs.config_only_additions
-                                                    or g_oArgs.config_ose else {},
-        # Disable Extension Pack PUEL features when building OSE.
-        lambda env: { 'VBOX_WITH_EXTPACK_PUEL': '', \
-                      'VBOX_WITH_EXTPACK_PUEL_BUILD': '' } if g_oArgs.config_ose else {},
-        # Disable Extension Pack feature (plus PUEL stuff) when building only Guest Additions
-        # or with Extension Pack feature disabled.
-        lambda env: { 'VBOX_WITH_EXTPACK_PUEL_BUILD': '' } if g_oArgs.config_only_additions
-                                                           or g_oArgs.config_disable_extpack else {},
-        # Disable FE/Qt + NLS translations (requires lrelease) if Qt is disabled.
-        lambda env: { 'VBOX_WITH_QTGUI': '',
-                      'VBOX_WITH_NLS': '',
-                      'VBOX_WITH_MAIN_NLS': '',
-                      'VBOX_WITH_PUEL_NLS': '',
-                      'VBOX_WITH_VBOXMANAGE_NLS': '' } if g_oArgs.config_libs_disable_qt else {},
-        # Disable components if we want to build headless.
-        lambda env: { 'VBOX_WITH_HEADLESS': '1', \
-                      'VBOX_WITH_QTGUI': '', \
-                      'VBOX_WITH_SECURELABEL': '', \
-                      'VBOX_WITH_VMSVGA3D': '', \
-                      'VBOX_WITH_3D_ACCELERATION' : '', \
-                      'VBOX_GUI_USE_QGL' : '' } if g_oArgs.config_build_headless else {},
-        # Disable building the Guest Additions.
-        lambda env: { 'VBOX_WITH_ADDITIONS': '' } if g_oArgs.config_disable_additions else {},
-        # Disable features when OpenGL is disabled.
-        lambda env: { 'VBOX_WITH_VMSVGA3D': '', \
-                      'VBOX_WITH_3D_ACCELERATION' : '', \
-                      'VBOX_GUI_USE_QGL' : '' } if g_oArgs.config_disable_opengl else {},
-        # Disable recording if libvpx is disabled.
-        lambda env: { 'VBOX_WITH_LIBVPX': '', \
-                      'VBOX_WITH_RECORDING': '' } if g_oArgs.config_libs_disable_libvpx else {},
-        # Disable audio recording if libvpx is disabled.
-        lambda env: { 'VBOX_WITH_LIBOGG': '', \
-                      'VBOX_WITH_LIBVORBIS': '', \
-                      'VBOX_WITH_AUDIO_RECORDING': '' } if  g_oArgs.config_libs_disable_libogg \
-                                                        and g_oArgs.config_libs_disable_libvorbis else {},
-        # Disable building the documentation.
-        lambda env: { 'VBOX_WITH_DOCS': '' } if g_oArgs.config_disable_docs else {},
-        # Disable building with pylint.
-        lambda env: { 'VBOX_WITH_PYLINT': '' } if g_oArgs.config_disable_pylint else {},
-        # Disable building the udptunnel feature.
-        lambda env: { 'VBOX_WITH_UDPTUNNEL': '' } if g_oArgs.config_disable_udptunnel else {},
-        # Disable building webservices if GSOAP is disabled.
-        lambda env: { 'VBOX_WITH_GSOAP': '', \
-                      'VBOX_WITH_WEBSERVICES': '' } if g_oArgs.config_tools_disable_gsoap else {},
-        # Disable building documentation (requires ant) + Java webservices if java is disabled.
-        lambda env: { 'VBOX_WITH_DOCS' : '', \
-                      'VBOX_WITH_JWS' : '', \
-                      'VBOX_WITH_JMSCOM': '', \
-                      'VBOX_WITH_JXPCOM' : '' } if g_oArgs.config_tools_disable_java else {},
-        # Disable components which require COM.
-        lambda env: { 'VBOX_WITH_MAIN': '', \
-                      'VBOX_WITH_QTGUI': '', \
-                      'VBOX_WITH_VBOXSDL': '', \
-                      'VBOX_WITH_DEBUGGER_GUI': '' } if g_oArgs.config_disable_com else {},
-        # Disable components which require Python. Most likely this will blow up the build, as Python is mandatory nowadays.
-        lambda env: { 'VBOX_WITH_PYTHON': '' } if g_oArgs.config_disable_python else {},
-        # Python is mandatory nowadays.
-        lambda env: { 'VBOX_BLD_PYTHON': os.path.join(g_oArgs.config_python_path, 'python' + getExeSuff() ) } if g_oArgs.config_python_path else {},
-        # Disable DTrace stuff if specified.
-        lambda env: { 'VBOX_WITH_EXTPACK_VBOXDTRACE': '', \
-                      'VBOX_WITH_DTRACE': ''  } if g_oArgs.config_disable_dtrace else {},
-        # Disable other stuff depending on SDL if SDL is disabled (like libsdl2_ttf).
-        lambda env: { 'VBOX_WITH_SDL': '', \
-                      'VBOX_WITH_SECURE_LABEL': '' } if g_oArgs.config_libs_disable_libsdl2 else {},
-
-        #
-        # Windows
-        #
-        lambda env: { 'VBOX_PATH_WIN_DDK_ROOT': g_oArgs.config_tools_path_win_ddk } if g_oArgs.config_tools_path_win_ddk else {},
-        lambda env: { 'VBOX_PATH_WIN_SDK_ROOT': g_oArgs.config_tools_path_win_sdk10 } if g_oArgs.config_tools_path_win_sdk10 else {},
-        lambda env: { 'VBOX_PATH_WIN_SDK10_ROOT': g_oArgs.config_tools_path_win_sdk10 } if g_oArgs.config_tools_path_win_sdk10 else {},
-        # Note: Pre-defined environment variable by vcpkg. Do not change.
-        lambda env: { 'VCPKG_ROOT': g_oArgs.config_win_vcpkg_root } if g_oArgs.config_win_vcpkg_root else {},
-
-        #
-        # macOS
-        #
-        # Sets the macOS SDK path.
-        lambda env: { 'VBOX_PATH_MACOSX_SDK_ROOT': g_oArgs.config_macos_sdk_path } if g_oArgs.config_macos_sdk_path else {},
-    ];
-    g_oEnv.transform(envTransforms);
-
     if g_cVerbosity >= 2:
         printVerbose(2, 'Environment manager variables:');
         print(g_oEnv.env);
@@ -4053,6 +3948,122 @@ def main():
             if      fRc is False \
             and not g_fContOnErr:
                 break;
+
+    #
+    # Handle environment variable transformations.
+    #
+    # This is needed to set/unset/change other environment variables on already set ones.
+    # For instance, building OSE requires certain components to be disabled. Same when a certain library gets disabled.
+    #
+    aEnvTransformations = [
+        #
+        # Generic
+        #
+        # Only build the Guest Additions if explicitly specified.
+        lambda env: { 'VBOX_ONLY_ADDITIONS': '1' } if g_oArgs.config_only_additions else {},
+        # Only build the documentation if explicitly specified.
+        lambda env: { 'VBOX_ONLY_DOCS': '1' } if g_oArgs.config_only_additions else {},
+        # Disabling building the docs when only building Additions or explicitly disabled building the docs.
+        lambda env: { 'VBOX_WITH_DOCS_PACKING': '' } if g_oArgs.config_only_additions
+                                                     or g_oArgs.config_disable_docs else {},
+        lambda env: { 'VBOX_WITH_WEBSERVICES': '' } if g_oArgs.config_only_additions else {},
+        # Disable stuff which aren't available in OSE or if building the Validation Kit is disabled.
+        lambda env: { 'VBOX_WITH_VALIDATIONKIT': '' , 'VBOX_WITH_WIN32_ADDITIONS': '' } if g_oArgs.config_ose
+                                                                                        or g_oArgs.config_tools_disable_validationkit else {},
+        # Disable building the Extension Pack VNC feature when only building Additions.
+        lambda env: { 'VBOX_WITH_EXTPACK_VNC': '' } if g_oArgs.config_only_additions
+                                                    or g_oArgs.config_ose else {},
+        # Disable Extension Pack PUEL features when building OSE.
+        lambda env: { 'VBOX_WITH_EXTPACK_PUEL': '',
+                      'VBOX_WITH_EXTPACK_PUEL_BUILD': '' } if g_oArgs.config_ose else {},
+        # Disable Extension Pack feature (plus PUEL stuff) when building only Guest Additions
+        # or with Extension Pack feature disabled.
+        lambda env: { 'VBOX_WITH_EXTPACK_PUEL_BUILD': '' } if g_oArgs.config_only_additions
+                                                           or g_oArgs.config_disable_extpack else {},
+        lambda env: { 'VBOX_WITH_DXMT': '' } if g_oArgs.config_libs_disable_dxmt else {},
+        lambda env: { 'VBOX_WITH_DXVK': '' } if g_oArgs.config_libs_disable_dxvk else {},
+        # Disable FE/Qt + NLS translations (requires lrelease) if Qt is disabled.
+        lambda env: { 'VBOX_WITH_QTGUI': '',
+                      'VBOX_WITH_NLS': '',
+                      'VBOX_WITH_MAIN_NLS': '',
+                      'VBOX_WITH_PUEL_NLS': '',
+                      'VBOX_WITH_VBOXMANAGE_NLS': '' } if g_oArgs.config_libs_disable_qt else {},
+        lambda env: { 'VBOX_WITH_VBOXSDL': '' } if g_oArgs.config_libs_disable_libsdl2 else {},
+        lambda env: { 'VBOX_WITH_SECURE_LABEL': '' } if g_oArgs.config_libs_disable_libsdl2_ttf else {},
+        lambda env: { 'VBOX_WITH_LIBSSH': '' } if g_oArgs.config_libs_disable_libssh else {},
+        lambda env: { 'VBOX_WITH_EXTPACK_VNC': '' } if g_oArgs.config_libs_disable_libvncserver else {},
+        # Disable components if we want to build headless.
+        lambda env: { 'VBOX_WITH_HEADLESS': '1',
+                      'VBOX_WITH_QTGUI': '',
+                      'VBOX_WITH_SECURELABEL': '',
+                      'VBOX_WITH_VMSVGA3D': '',
+                      'VBOX_WITH_3D_ACCELERATION' : '',
+                      'VBOX_GUI_USE_QGL' : '' } if g_oArgs.config_build_headless else {},
+        # Disable building the Guest Additions.
+        lambda env: { 'VBOX_WITH_ADDITIONS': '' } if g_oArgs.config_disable_additions else {},
+        # Disable features when OpenGL is disabled.
+        lambda env: { 'VBOX_WITH_VMSVGA3D': '',
+                      'VBOX_WITH_3D_ACCELERATION' : '',
+                      'VBOX_GUI_USE_QGL' : '' } if g_oArgs.config_disable_opengl else {},
+        # Disable recording if libvpx is disabled.
+        lambda env: { 'VBOX_WITH_LIBVPX': '',
+                      'VBOX_WITH_RECORDING': '' } if g_oArgs.config_libs_disable_libvpx else {},
+        # Disable audio recording if libvpx is disabled.
+        lambda env: { 'VBOX_WITH_LIBOGG': '',
+                      'VBOX_WITH_LIBVORBIS': '',
+                      'VBOX_WITH_AUDIO_RECORDING': '' } if  g_oArgs.config_libs_disable_libogg
+                                                        and g_oArgs.config_libs_disable_libvorbis else {},
+        # Disable building the documentation.
+        lambda env: { 'VBOX_WITH_DOCS': '' } if g_oArgs.config_disable_docs else {},
+        # Disable building with pylint.
+        lambda env: { 'VBOX_WITH_PYLINT': '' } if g_oArgs.config_disable_pylint else {},
+        # Disable building the udptunnel feature.
+        lambda env: { 'VBOX_WITH_UDPTUNNEL': '' } if g_oArgs.config_disable_udptunnel else {},
+        # Disable DXVK if glslangValidator is disabled.
+        lambda env: { 'VBOX_WITH_DXVK': '' } if g_oArgs.config_tools_disable_glslang else {},
+        # Disable building webservices if GSOAP is disabled.
+        lambda env: { 'VBOX_WITH_GSOAP': '',
+                      'VBOX_WITH_WEBSERVICES': '' } if g_oArgs.config_tools_disable_gsoap else {},
+        # Disable building documentation (requires ant) + Java webservices if java is disabled.
+        lambda env: { 'VBOX_WITH_DOCS' : '',
+                      'VBOX_WITH_JWS' : '',
+                      'VBOX_WITH_JMSCOM': '',
+                      'VBOX_WITH_JXPCOM' : '' } if g_oArgs.config_tools_disable_java else {},
+        # Disable Open Watcom if specified.
+        lambda env: { 'VBOX_WITH_OPEN_WATCOM': '' } if g_oArgs.config_tools_disable_openwatcom else {},
+        # Disable components which require COM.
+        lambda env: { 'VBOX_WITH_MAIN': '',
+                      'VBOX_WITH_QTGUI': '',
+                      'VBOX_WITH_VBOXSDL': '',
+                      'VBOX_WITH_DEBUGGER_GUI': '' } if g_oArgs.config_disable_com else {},
+        # Disable components which require Python. Most likely this will blow up the build, as Python is mandatory nowadays.
+        lambda env: { 'VBOX_WITH_PYTHON': '' } if g_oArgs.config_tools_disable_python else {},
+        # Python is mandatory nowadays.
+        lambda env: { 'VBOX_BLD_PYTHON': os.path.join(g_oArgs.config_python_path, 'python' + getExeSuff() ) } if g_oArgs.config_python_path else {},
+        # Disable DTrace stuff if specified.
+        lambda env: { 'VBOX_WITH_EXTPACK_VBOXDTRACE': '',
+                      'VBOX_WITH_DTRACE': ''  } if g_oArgs.config_disable_dtrace else {},
+        # Disable other stuff depending on SDL if SDL is disabled (like libsdl2_ttf).
+        lambda env: { 'VBOX_WITH_SDL': '',
+                      'VBOX_WITH_SECURE_LABEL': '' } if g_oArgs.config_libs_disable_libsdl2 else {},
+
+        #
+        # Windows
+        #
+        lambda env: { 'VBOX_PATH_WIN_DDK_ROOT': g_oArgs.config_tools_path_win_ddk } if g_oArgs.config_tools_path_win_ddk else {},
+        lambda env: { 'VBOX_PATH_WIN_SDK_ROOT': g_oArgs.config_tools_path_win_sdk10 } if g_oArgs.config_tools_path_win_sdk10 else {},
+        lambda env: { 'VBOX_PATH_WIN_SDK10_ROOT': g_oArgs.config_tools_path_win_sdk10 } if g_oArgs.config_tools_path_win_sdk10 else {},
+        # Note: Pre-defined environment variable by vcpkg. Do not change.
+        lambda env: { 'VCPKG_ROOT': g_oArgs.config_win_vcpkg_root } if g_oArgs.config_win_vcpkg_root else {},
+
+        #
+        # macOS
+        #
+        # Sets the macOS SDK path.
+        lambda env: { 'VBOX_PATH_MACOSX_SDK_ROOT': g_oArgs.config_macos_sdk_path } if g_oArgs.config_macos_sdk_path else {},
+    ];
+    g_oEnv.transform(aEnvTransformations);
+
     #
     # Print summary.
     #
