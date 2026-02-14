@@ -13,6 +13,11 @@ This is a personal fork of the Oracle VirtualBox project.
 
 This fork is maintained for personal use and development purposes.
 
+## Getting Started
+
+**📥 Want to clone this repository to your computer?**  
+See [SETUP.md](./SETUP.md) for detailed instructions in Hebrew and English on how to download and set up this project locally.
+
 ## Upstream
 
 The original VirtualBox project is maintained by Oracle Corporation.
